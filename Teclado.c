@@ -1,32 +1,22 @@
-/*     AVANCES    */
+#include "MKL25Z4.h"
 
+const int filas = 4;
+const int columnas = 4;
 
-#define F1 12
-#define F2 13
-#define F3 16
-#define F4 17
-#define C1 7
-#define C2 0
-#define C3 3
-#define C4 4
+const int pinesFilas[4] = {12, 13, 16, 17};
+const int pinesColumnas[4] = {7, 0, 3, 4};
 
-const filas = 4;
-const columnas = 4;
+int tecla;
+int pulsado = 0;
 
-const pinesFilas[filas] = {F1, F2, F3, F4};
-const pinesColumnas[columnas] = {C1, C2, C3, C4};
-
-int fila = 0;
-int columna = 0;
-
-char teclas[filas][columnas] = {
+char teclas[4][4] = {
   { '1','2','3', 'A' },
   { '4','5','6', 'B' },
   { '7','8','9', 'C' },
   { '#','0','*', 'D' }
 };
 
-void keypad.cfg(){
+void keypad_cfg(){
     SIM->SCGC5 |= SIM_SCGC5_PORTC_MASK;
     PORTC->PCR[pinesColumnas[0]] = PORT_PCR_MUX(0) | PORT_PCR_PE_MASK | PORT_PCR_PS_MASK;
     PORTC->PCR[pinesColumnas[1]] = PORT_PCR_MUX(0) | PORT_PCR_PE_MASK | PORT_PCR_PS_MASK;
@@ -38,17 +28,21 @@ void keypad.cfg(){
     PORTC->PCR[pinesFilas[3]] = PORT_PCR_MUX(1);
 }
 
-void keypad.read(){
+char keypad_read(){
     PTC->PSOR |= (1u<<pinesFilas[0]);
     PTC->PSOR |= (1u<<pinesFilas[1]);
     PTC->PSOR |= (1u<<pinesFilas[2]);
     PTC->PSOR |= (1u<<pinesFilas[3]);
-}
     while(1){
-        for(int i = 0; i < columnas; i++){
-            PTC->PCOR |= (1<<pinesFilas[i]);  
-            if(PTC->PDIR & (1<<pinesColumnas[i]){
-                
-            })
+        for(int f = 0; f < filas; f++){
+            PTC->PCOR |= (1<<pinesFilas[f]);  
+            for(int c = 0; c < columnas; c++){ 
+                if(!(PTC->PDIR & (1<<pinesColumnas[c]))){
+                    tecla = teclas[f][c];
+                }
+            }
+            PTC->PSOR |= (1<<pinesFilas[f]); 
         }
+        return tecla;
     }
+}
